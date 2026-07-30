@@ -243,7 +243,7 @@ function switchView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
   document.getElementById('view-compare').style.display=v==='compare'?'':'none';
   document.getElementById('view-bench').style.display=v==='bench'?'':'none';
-  if(v==='bench'&&!BENCH)ensureBench();
+  if(v==='bench')ensureBench();
 }
 function ensureBench(){
   if(!BENCH&&DATA){BENCH=DATA.houchu;PLATS=DATA.houchu_platforms;}
