@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 本地私密配置（含菜亿箩密码等，切勿提交）
+secrets.local.json
+
+# 智能体工作目录（内部记忆/任务数据，非项目源码）
+.workbuddy/
+
+# 日志
+*.log
+
+# macOS
+.DS_Store
+
+# 临时文件
+/tmp/
+cap_*.png
+cap_*.html
+cap_*.json
+CAPTCHA_WAITING.json

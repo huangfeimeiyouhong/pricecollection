@@ -1,0 +1,230 @@
+{
+  "bindings": {
+    "1997971750885425182": {
+      "match_key": "上海青",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "2074765281577803777": {
+      "match_key": "冬枣",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813775": {
+      "match_key": "冬瓜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813762": {
+      "match_key": "土豆",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425164": {
+      "match_key": "大白菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750898008076": {
+      "match_key": "大葱",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425166": {
+      "match_key": "小白菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750898008068": {
+      "match_key": "平菇",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750906396709": {
+      "match_key": "排骨",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813799": {
+      "match_key": "杏鲍菇",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750902202404": {
+      "match_key": "柠檬",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813793": {
+      "match_key": "毛豆",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425179": {
+      "match_key": "油菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425178": {
+      "match_key": "油麦菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750910590987": {
+      "match_key": "牛肉",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "2017152177780989953": {
+      "match_key": "猪心",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750910590980": {
+      "match_key": "猪肝",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750898008079": {
+      "match_key": "生姜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425174": {
+      "match_key": "生菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750889619492": {
+      "match_key": "白萝卜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425181": {
+      "match_key": "空心菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813790": {
+      "match_key": "绿豆芽",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750910590999": {
+      "match_key": "羊肉",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750898008080": {
+      "match_key": "生姜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750906396687": {
+      "match_key": "脐橙",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813771": {
+      "match_key": "苦瓜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813786": {
+      "match_key": "茄子",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "2049402883857969154": {
+      "match_key": "荔枝",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813797": {
+      "match_key": "荷兰豆",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425177": {
+      "match_key": "菠菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750902202402": {
+      "match_key": "蜜桔",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "2072917033540530178": {
+      "match_key": "蟠桃",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750898008086": {
+      "match_key": "西兰花",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813787": {
+      "match_key": "西红柿",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750889619459": {
+      "match_key": "韭菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425172": {
+      "match_key": "香菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813768": {
+      "match_key": "黄瓜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750893813792": {
+      "match_key": "黄豆芽",
+      "confirmed": true,
+      "updated_at": "2026-07-28 14:31:30"
+    },
+    "1997971750885425171": {
+      "match_key": "圆白菜",
+      "confirmed": true,
+      "updated_at": "2026-07-28 17:11:48"
+    },
+    "1997971750902202377": {
+      "match_key": "苹果",
+      "confirmed": true,
+      "updated_at": "2026-07-29 08:57:07"
+    },
+    "1997971750902202411": {
+      "match_key": "香蕉",
+      "confirmed": true,
+      "updated_at": "2026-07-29 09:03:13"
+    },
+    "1997971750893813777": {
+      "match_key": "尖椒",
+      "confirmed": true,
+      "updated_at": "2026-07-29 09:16:29"
+    },
+    "1997971750889619482": {
+      "match_key": "蒜薹",
+      "confirmed": true,
+      "updated_at": "2026-07-29 09:16:45"
+    },
+    "2053788443204517890": {
+      "match_key": "白条鸡",
+      "confirmed": true,
+      "updated_at": "2026-07-29 09:22:13"
+    },
+    "1997971750902202409": {
+      "match_key": "菠萝",
+      "confirmed": true,
+      "updated_at": "2026-07-29 09:22:53"
+    }
+  },
+  "updated_at": "2026-07-29 09:22:53"
+}

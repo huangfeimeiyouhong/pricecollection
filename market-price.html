@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>市场价查询 · 各城市各平台原始价格</title><style>
+:root{--green:#07c160;--blue:#1989fa;--orange:#ff9f43;--bg:#f5f6f8;--card:#fff;--line:#ebeef5;--text:#1f2329;--sub:#8a8f99;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-width:1180px;margin:0 auto;}
+.nav{display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.nav .brand{font-weight:700;color:var(--text);margin-right:10px;font-size:15px;}
+.nav a{font-size:13px;color:var(--sub);text-decoration:none;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;transition:all .15s;}
+.nav a:hover{border-color:var(--green);color:var(--green);}
+.nav a.on{background:var(--green);color:#fff;border-color:var(--green);}
+.topbar h1{font-size:20px}.topbar .hint{color:var(--sub);font-size:12px;margin-top:4px;line-height:1.5;}
+.controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border-radius:10px;padding:12px 14px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ctl{display:flex;flex-direction:column;gap:4px;}.ctl label{font-size:12px;color:var(--sub);}
+.ctl select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;min-width:150px;background:#fff;}
+.ctl select:focus{border-color:var(--green);}
+.summary{display:flex;gap:12px;margin:14px 0;flex-wrap:wrap;}
+.stat{flex:1;min-width:120px;background:var(--card);border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.stat .n{font-size:22px;font-weight:600}.stat .l{color:var(--sub);font-size:12px;margin-top:2px;}
+.note{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 14px;line-height:1.7;}
+.note b{color:var(--text);}
+.filters{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;}
+.filters input:focus,.filters select:focus{border-color:var(--green);}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+.pcard-full{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden;display:flex;flex-direction:column;}
+.pc-head{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);background:#fafbfc;}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;}
+.pc-name{font-weight:600;font-size:14px;}
+.pc-cnt{color:var(--sub);font-size:12px;margin-left:2px;}
+.pc-status{margin-left:auto;font-size:11px;padding:1px 8px;border-radius:8px;}
+.b-ok{background:#e8f8ee;color:#07a050;}.b-none{background:#f0f0f0;color:#888;}
+.pc-body{max-height:460px;overflow-y:auto;}
+.ptable{width:100%;border-collapse:collapse;font-size:13px;}
+.ptable th{position:sticky;top:0;background:#fafbfc;color:var(--sub);font-weight:500;font-size:12px;text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);}
+.ptable td{padding:8px 12px;border-bottom:1px solid #f2f3f5;vertical-align:top;}
+.ptable tr:last-child td{border-bottom:none;}
+.pname{font-weight:500;}.pcat{color:var(--sub);font-size:11px;margin-top:2px;}
+.pprice{font-weight:700;color:#e4393c;font-size:14px;white-space:nowrap;}
+.pprice .u{font-size:11px;font-weight:400;color:var(--sub);margin-left:2px;}
+.pprice .kg{display:block;font-size:11px;font-weight:400;color:var(--sub);margin-top:2px;}
+.ptime{color:var(--sub);font-size:12px;white-space:nowrap;}
+.empty{color:var(--sub);padding:24px;text-align:center;font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323233;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;}
+.btn-refresh{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;}
+.btn-refresh:hover{background:#f0fbf4;}.btn-refresh:disabled{opacity:.6;cursor:default;}
+</style></head><body>
+<div class="nav">
+  <span class="brand">价格采集系统</span>
+  <a href="./index.html">价格采集</a>
+  <a href="./market-price.html" class="on">市场价查询</a>
+</div>
+<div class="topbar"><div><h1>市场价查询</h1><div class="hint" id="hint">加载中…</div></div></div>
+<div class="controls">
+  <div class="ctl"><label>城市</label><select id="fCity"></select></div>
+  <div class="ctl"><label>数据日期</label><select id="fDate"></select></div>
+  <button id="btnRefresh" class="btn-refresh">刷新缓存</button>
+</div>
+<div class="summary">
+  <div class="stat"><div class="n" id="s-plat">0</div><div class="l">平台数</div></div>
+  <div class="stat"><div class="n" id="s-prod">0</div><div class="l">商品种类（全市）</div></div>
+  <div class="stat"><div class="n" id="s-date">—</div><div class="l">数据日期</div></div>
+</div>
+<div class="note" id="note">本页仅展示各城市、各平台采集到的<b>原始价格</b>，不做基准商品映射、不做跨平台比价。数据与「价格采集」共用（同一份静态数据，由后端发布）。</div>
+<div class="filters">
+  <input id="fKw" placeholder="搜索商品名称…" style="width:200px">
+  <select id="fCat"><option value="">全部分类</option></select>
+  <span id="fHit" style="color:var(--sub);font-size:12px"></span>
+</div>
+<div class="cards" id="cards"></div>
+<div class="toast" id="toast"></div>
+<script src="./static-data.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+let DATA=null, currentCity=null, currentDate=null;
+
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+async function boot(){
+  const cached=window.PriceStatic.readCache();
+  if(cached&&cached.snaps){
+    DATA=cached;initCities();
+    $('#hint').innerHTML+=' <span style="color:var(--sub)">（本地缓存 · '+cached.generated_at+'）</span>';
+  }
+  try{
+    const d=await window.PriceStatic.fetchLatest();
+    const changed=!cached||d.generated_at!==cached.generated_at;
+    DATA=d;initCities();
+    if(changed&&cached)toast('数据已更新至 '+d.generated_at);
+  }catch(e){
+    if(!cached)$('#hint').textContent='加载数据失败：'+e.message+'（请通过本地服务器或已部署站点访问，勿用 file:// 直接打开）';
+    else toast('获取最新数据失败，显示本地缓存');
+  }
+}
+
+async function refreshCache(){
+  const btn=$('#btnRefresh');if(btn.disabled)return;const old=btn.textContent;btn.disabled=true;btn.textContent='刷新中…';
+  try{const d=await window.PriceStatic.fetchLatest();DATA=d;initCities();toast('本地缓存已更新（生成于 '+d.generated_at+'）');}
+  catch(e){toast('刷新失败：'+e.message);}finally{btn.disabled=false;btn.textContent=old;}
+}
+$('#btnRefresh').onclick=refreshCache;
+
+function initCities(){
+  const sel=$('#fCity'); sel.innerHTML='';
+  (DATA.cities||[]).forEach(c=>{
+    const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o);
+  });
+  sel.onchange=()=>selectCity(sel.value);
+  $('#fDate').onchange=()=>selectDate($('#fDate').value);
+  $('#fKw').oninput=render;
+  $('#fCat').onchange=render;
+  if(DATA.cities&&DATA.cities.length) selectCity(DATA.cities[0].id);
+  else $('#hint').textContent='暂无城市数据';
+}
+
+function selectCity(city){
+  currentCity=city;
+  const dates=(DATA.dates&&DATA.dates[city])||[];
+  const sel=$('#fDate'); sel.innerHTML='';
+  dates.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+  if(dates.length) selectDate(dates[0]);
+  else { currentDate=null; $('#hint').textContent='该城市暂无存档数据'; render(); }
+}
+
+function selectDate(d){
+  currentDate=d;
+  const snap=(DATA.snaps&&DATA.snaps[currentCity]&&DATA.snaps[currentCity][d])||null;
+  const meta=snap&&snap.meta||{};
+  const built=meta.built_at||'';
+  $('#hint').textContent='数据日期 '+d+(built?(' ｜ 本地构建 '+built):'');
+  render();
+}
+
+function platRows(pid, snap){
+  if(!snap) return [];
+  const out=[];
+  for(const item of (snap.canonical||[])){
+    const pr=(item.prices||[]).find(x=>x.pid===pid);
+    if(!pr) continue;
+    out.push({name:item.name, cat1:item.cat1||'其他', price:pr.price, kg:pr.kg, spec:pr.spec, time:pr.time});
+  }
+  return out;
+}
+
+function render(){
+  const snap=(DATA&&DATA.snaps&&DATA.snaps[currentCity]&&DATA.snaps[currentCity][currentDate])||null;
+  const plats=(DATA.platforms||[]).filter(p=>p.city===currentCity);
+  const source=(snap&&snap.meta&&snap.meta.source)||{};
+  // 汇总
+  $('#s-plat').textContent=plats.length;
+  $('#s-prod').textContent=snap?(snap.canonical||[]).length:0;
+  $('#s-date').textContent=currentDate||'—';
+  // 分类下拉
+  const cats=new Set(); if(snap)(snap.canonical||[]).forEach(i=>cats.add(i.cat1||'其他'));
+  const fcat=$('#fCat'); const cur=fcat.value;
+  fcat.innerHTML='<option value="">全部分类</option>'+[...cats].sort().map(c=>`<option value="${c}">${c}</option>`).join('');
+  if([...cats].includes(cur)) fcat.value=cur; else fcat.value='';
+  const kw=$('#fKw').value.trim();
+  const cat=fcat.value;
+  // 平台卡片
+  const cards=$('#cards'); cards.innerHTML='';
+  let totalHit=0;
+  plats.forEach(p=>{
+    let rows=platRows(p.id, snap).filter(r=>{
+      if(kw && !r.name.includes(kw)) return false;
+      if(cat && r.cat1!==cat) return false;
+      return true;
+    });
+    totalHit+=rows.length;
+    const st=source[p.id]||{};
+    const card=document.createElement('div'); card.className='pcard-full';
+    const statusHtml = st.ok!==false
+      ? (rows.length? '' : '<span class="pc-status b-none">空</span>')
+      : '<span class="pc-status b-none">无数据</span>';
+    const bodyHtml = rows.length
+      ? `<table class="ptable"><thead><tr><th>商品</th><th>价格</th><th>规格</th><th>报价时间</th></tr></thead><tbody>${
+          rows.map(r=>`<tr>
+            <td><div class="pname">${r.name}</div><div class="pcat">${r.cat1}</div></td>
+            <td class="pprice">¥${Number(r.price).toFixed(2)}<span class="u">元/斤</span>${
+              r.kg!=null?`<span class="kg">¥${Number(r.kg).toFixed(2)} 元/公斤</span>`:''}</td>
+            <td>${r.spec||'—'}</td>
+            <td class="ptime">${r.time||'—'}</td>
+          </tr>`).join('')
+        }</tbody></table>`
+      : '<div class="empty">该平台暂无数据</div>';
+    card.innerHTML=`<div class="pc-head">
+        <span class="dot" style="background:${p.color||'#999'}"></span>
+        <span class="pc-name">${p.name}</span>
+        <span class="pc-cnt">${rows.length} 种</span>${statusHtml}
+      </div><div class="pc-body">${bodyHtml}</div>`;
+    cards.appendChild(card);
+  });
+  if(!plats.length) cards.innerHTML='<div class="empty">该城市未配置平台</div>';
+  $('#fHit').textContent = (kw||cat) ? ('匹配 '+totalHit+' 条') : '';
+}
+
+boot();
+</script>
+</body></html>

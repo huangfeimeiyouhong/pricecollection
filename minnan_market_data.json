@@ -1,0 +1,19 @@
+{
+  "source": "农业农村部全国农产品批发市场价格信息系统（pfsc.agri.cn）",
+  "forwarded_by": "21food.cn 食品商务网（食价搜）",
+  "market_name": "闽南果蔬（福建厦门同安闽南果蔬批发市场）",
+  "market_id": "76E4F160C0D5936CE040A8C020017257",
+  "market_code": "3502003",
+  "address": "厦门市同安区洪塘镇闽夏物流中心B12栋二层管理一部",
+  "quote_date": "2026-07-24",
+  "unit": "元/公斤",
+  "products": [
+    {"name":"大白菜","price":1.6},{"name":"油菜","price":3.2},{"name":"生菜","price":3.6},
+    {"name":"菠菜","price":6.6},{"name":"香菜","price":3.6},{"name":"萝卜","price":1.4},
+    {"name":"胡萝卜","price":1.8},{"name":"大葱","price":3.8},{"name":"生姜","price":7.6},
+    {"name":"大蒜","price":9.2},{"name":"芹菜","price":4.2},{"name":"莴笋","price":2.2},
+    {"name":"蒜薹","price":7.0},{"name":"绿豆芽","price":2.0},{"name":"西红柿","price":2.8},
+    {"name":"尖椒","price":4.4},{"name":"青椒","price":4.4},{"name":"冬瓜","price":1.3},
+    {"name":"荷兰豆","price":12.0},{"name":"鲜食玉米","price":2.6}
+  ]
+}

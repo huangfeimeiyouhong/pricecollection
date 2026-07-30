@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>价格采集 · 多平台比价（菜亿箩/厦门发改委/闽南果蔬）</title><style>
+:root{--green:#07c160;--blue:#1989fa;--orange:#ff9f43;--bg:#f5f6f8;--card:#fff;--line:#ebeef5;--text:#1f2329;--sub:#8a8f99;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-width:1180px;margin:0 auto;}
+.topbar h1{font-size:20px}.topbar .hint{color:var(--sub);font-size:12px;margin-top:4px;line-height:1.5;}
+.controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border-radius:10px;padding:12px 14px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ctl{display:flex;flex-direction:column;gap:4px;}.ctl label{font-size:12px;color:var(--sub);}
+.ctl select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;min-width:130px;background:#fff;}
+.ctl select:focus{border-color:var(--green);}.ctl select:disabled{color:var(--sub);background:#fafafa;}
+.btn-update{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;position:relative;}
+.btn-update:hover{background:#f0fbf4;}.btn-update:disabled{opacity:.6;cursor:default;}
+.btn-update.loading{color:transparent;}.btn-update.loading::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid var(--green);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.summary{display:flex;gap:12px;margin:14px 0;flex-wrap:wrap;}
+.stat{flex:1;min-width:120px;background:var(--card);border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.stat .n{font-size:22px;font-weight:600}.stat .l{color:var(--sub);font-size:12px;margin-top:2px;}
+.stat.clickable{cursor:pointer;border:1px solid transparent;transition:all .15s;}
+.stat.clickable:hover{border-color:var(--line);transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.stat.clickable.active{border-color:var(--green);background:#f0fbf4;}
+.filters{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;}
+.filters input:focus,.filters select:focus{border-color:var(--green);}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}.chip{border:1px solid var(--line);border-radius:16px;padding:5px 12px;cursor:pointer;font-size:13px;user-select:none;background:#fff;}
+.chip.on{background:var(--green);color:#fff;border-color:var(--green);}
+.sec-title{font-size:15px;font-weight:600;margin:18px 4px 10px;display:flex;align-items:center;gap:8px;}
+.sec-title .tag{font-size:12px;font-weight:400;color:#fff;background:#ff9f43;border-radius:10px;padding:1px 8px;}
+.acc{border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:8px;overflow:visible;}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;}
+.acc-head:hover{background:#fafafa;}.acc-head .nm{font-weight:600;}.acc-head .cat{color:var(--sub);font-size:12px;margin-left:8px;}
+.arrow{transition:transform .2s;color:var(--sub);}.acc.open .arrow{transform:rotate(90deg);}
+.acc-body{display:none;border-top:1px solid var(--line);padding:12px 14px;}.acc.open .acc-body{display:block;}
+.pcards{display:flex;gap:10px;flex-wrap:wrap;}
+.pcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:180px;flex:1;position:relative;}
+.pcard.best{border-color:var(--green);background:#f0fbf4;}.pcard.nodata{background:#fafafa;color:var(--sub);}
+.pcard .plat{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);}
+.dot{width:8px;height:8px;border-radius:50%;}.pcard .pr{font-size:20px;font-weight:700;margin:4px 0;}
+.pcard .pr .u{font-size:12px;font-weight:400;color:var(--sub);}.pcard .meta{font-size:12px;color:var(--sub);}
+.badge{font-size:11px;padding:1px 7px;border-radius:8px;}.b-ok{background:#e8f8ee;color:#07a050;}.badge.best{background:var(--green);color:#fff;}
+.pending-item{border:1px dashed #ffb870;background:#fffaf3;border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.pending-item .row1{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pending-item .pname{font-weight:600;}.pending-item .src{color:var(--sub);font-size:12px;}
+.sug{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;margin-top:6px;}
+.sug:hover{border-color:var(--blue);background:#f5faff;}.sug .sc{font-size:11px;padding:1px 6px;border-radius:6px;}
+.sc-h{background:#e8f8ee;color:#07a050;}.sc-m{background:#fff3e0;color:#e08a00;}.sc-l{background:#f0f0f0;color:#888;}
+.sug .act{margin-left:auto;color:var(--blue);font-size:12px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323233;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;}.empty{color:var(--sub);padding:20px;text-align:center;}
+.note{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 14px;line-height:1.7;}
+.note b{color:var(--text);}
+.tabs{display:flex;gap:8px;margin:12px 0 0;}
+.tab{border:1px solid var(--line);border-radius:8px 8px 0 0;padding:9px 18px;cursor:pointer;font-size:14px;background:#fff;color:var(--sub);font-weight:600;}
+.tab.on{background:var(--green);color:#fff;border-color:var(--green);}
+.nav{display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.nav .brand{font-weight:700;color:var(--text);margin-right:10px;font-size:15px;}
+.nav a{font-size:13px;color:var(--sub);text-decoration:none;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;transition:all .15s;}
+.nav a:hover{border-color:var(--green);color:var(--green);}
+.nav a.on{background:var(--green);color:#fff;border-color:var(--green);}
+.bench-bar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--card);border-radius:10px;padding:12px 14px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.bench-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--sub);}
+.bench-stats b{color:var(--text);font-size:16px;}
+.brow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+.bname{font-weight:600;}.bname .bunit{color:var(--sub);font-size:12px;margin-left:6px;font-weight:400;}
+.bbind{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.b-badge{font-size:12px;padding:2px 9px;border-radius:8px;}
+.b-badge.ok{background:#e8f8ee;color:#07a050;}
+.b-badge.auto{background:#fff3e0;color:#e08a00;}
+.b-badge.none{background:#f0f0f0;color:#888;}
+/* 价格对比列表 · 基准库映射状态 —— 静态展示（无前端写回） */
+.bind-tag{font-size:13px;padding:4px 12px;border-radius:8px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.bind-ok{background:#e8f8ee;color:#07a050;border:1px solid #c3e8cd;}
+.bind-none{background:#f0f0f0;color:#888;border:1px solid #e2e2e2;}
+/* 基准库 · 分类分组 */
+.bcat-group{margin-bottom:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden;}
+.bcat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:#fafafa;}
+.bcat-head:hover{background:#f5f5f5;}
+.bcat-head .bcat-name{font-weight:600;font-size:14px;}
+.bcat-head .bcat-stats{display:flex;gap:10px;font-size:11px;color:var(--sub);}
+.bcat-head .bcat-stats span{background:#f0f0f0;padding:1px 7px;border-radius:6px;}
+.bcat-head .bcat-stats .s-ok{background:#e8f8ee;color:#07a050;}
+.bcat-head .bcat-stats .s-auto{background:#fff3e0;color:#e08a00;}
+.bcat-head .bcat-stats .s-none{background:#f0f0f0;color:#888;}
+.bcat-body{border-top:1px solid var(--line);}
+.bcat-group .brow{border:none;border-bottom:1px solid #f0f0f0;border-radius:0;margin-bottom:0;}
+.bcat-group .brow:last-child{border-bottom:none;}
+</style></head><body>
+<div class="nav">
+  <span class="brand">价格采集系统</span>
+  <a href="./index.html" class="on">价格采集</a>
+  <a href="./market-price.html">市场价查询</a>
+</div>
+<div class="topbar"><div><h1>价格采集 · 多平台比价</h1><div class="hint" id="hint">加载中…</div></div></div>
+<div class="tabs"><div class="tab on" data-view="compare">价格对比</div><div class="tab" data-view="bench">基准商品库</div></div>
+<div id="view-compare">
+<div class="controls"><div class="ctl"><label>城市</label><select id="fCity"></select></div><div class="ctl"><label>数据日期</label><select id="fDate"></select></div><button id="btnRefresh" class="btn-update">刷新缓存</button></div>
+<div class="summary"><div class="stat"><div class="n" id="s-plat">0</div><div class="l">接入平台</div></div><div class="stat"><div class="n" id="s-prod">0</div><div class="l">平台商品</div></div><div class="stat" id="stat-ok"><div class="n" style="color:var(--green)" id="s-ok">0</div><div class="l">已匹配</div></div><div class="stat" id="stat-pend"><div class="n" style="color:#e08a00" id="s-pend">0</div><div class="l">待映射</div></div></div>
+<div class="note" id="cityNote">加载中…</div>
+<div class="filters"><div class="chips" id="platChips"></div><select id="fCat"><option value="">全部分类</option></select><input id="fKw" placeholder="搜索商品名称…" style="width:180px"></div>
+<div class="sec-title">商品比价 <span class="tag" id="cntTag">0</span></div><div id="list"></div>
+</div>
+<div id="view-bench" style="display:none">
+  <div class="bench-bar">
+    <div class="bench-stats">
+      <span>基准商品 <b id="b-total">0</b></span>
+      <span>平台匹配池 <b id="b-pool">0</b></span>
+      <span>自动匹配 <b id="b-auto">0</b></span>
+      <span>已绑定 <b id="b-conf">0</b></span>
+      <span class="excluded-note">已排除非食材 <b id="b-excluded">0</b> 条</span>
+    </div>
+  </div>
+  <div class="filters">
+    <input id="bKw" placeholder="搜索后厨管家商品…" style="width:200px">
+    <select id="bCat"><option value="">全部分类</option></select>
+    <select id="bFilter">
+      <option value="">全部</option>
+      <option value="unmatched">未匹配</option>
+      <option value="auto">自动匹配</option>
+      <option value="confirmed">已绑定</option>
+    </select>
+    <span style="color:var(--sub);font-size:12px">基准商品库由后端配置并随数据一起发布，前端仅做静态展示。</span>
+  </div>
+  <div id="benchList"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="./static-data.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+let DATA=null;let currentCity=null;let currentDate=null;let activePlats=new Set();let bindFilter='all'; // 'all' | 'matched' | 'unmatched'
+function platformsOfCity(c){return DATA.platforms.filter(p=>p.city===c);}
+function cityName(c){const x=DATA.cities.find(z=>z.id===c);return x?x.name:c;}
+function datesOfCity(c){return (DATA.dates&&DATA.dates[c])||[];}
+function snap(){return (DATA.snaps[currentCity]&&DATA.snaps[currentCity][currentDate])||null;}
+function snapDemo(d){return !!(DATA.snaps[currentCity][d]&&DATA.snaps[currentCity][d].demo);}
+function buildCityOptions(){const sel=$('#fCity');sel.innerHTML='';DATA.cities.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;sel.appendChild(o);});sel.value=currentCity;sel.onchange=()=>{currentCity=sel.value;currentDate=datesOfCity(currentCity)[0]||null;buildDateOptions();buildPlatChips();render();};}
+function buildDateOptions(){const sel=$('#fDate');sel.innerHTML='';const ds=datesOfCity(currentCity);if(!ds.length){const o=document.createElement('option');o.value='';o.textContent='无数据';sel.appendChild(o);sel.disabled=true;return;}sel.disabled=false;ds.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d+(snapDemo(d)?'（示例）':'');sel.appendChild(o);});sel.value=currentDate||ds[0];sel.onchange=()=>{currentDate=sel.value;render();};}
+function buildPlatChips(){const box=$('#platChips');box.innerHTML='';const ps=platformsOfCity(currentCity);activePlats=new Set(ps.map(p=>p.id));ps.forEach(p=>{const c=document.createElement('div');c.className='chip on';c.textContent=p.name;c.onclick=()=>{c.classList.toggle('on');if(activePlats.has(p.id))activePlats.delete(p.id);else activePlats.add(p.id);render();};box.appendChild(c);});}
+function updateHint(){const ps=platformsOfCity(currentCity);const names=ps.map(p=>p.name).join('、')||'（暂无接入平台）';const d=currentDate?('｜ 数据日期：'+currentDate+(snapDemo(currentDate)?'（示例）':'')):'｜ 暂无数据';$('#hint').innerHTML='当前城市：<b>'+cityName(currentCity)+'</b> ｜ 接入平台：'+names+d+'。单位统一为元/斤。';}
+function updateNote(){
+ const ps=platformsOfCity(currentCity);
+ if(!ps.length){$('#cityNote').innerHTML='该城市暂未接入平台。请在后端 collect.py 的 CITY_PLATFORMS 中配置数据源并运行更新，再生成静态包发布。';return;}
+ const names=ps.map(p=>p.name).join('、');
+ const hasKg=ps.some(p=>['beijing','tianjin'].includes(p.src));
+ const hasSupplier=ps.some(p=>p.role==='supplier');
+ let parts=[];
+ parts.push(`当前「${cityName(currentCity)}」接入 <b>${names}</b> ${ps.length} 个数据源。`);
+ parts.push('映射引擎自动对齐：归一化同名→自动对齐；同义词库（上海青↔大青菜、马铃薯↔土豆、番茄↔西红柿等，<b>双向匹配</b>）→高置信建议；名称差异商品进入「待映射 / 人工校正」。');
+ if(hasKg) parts.push('21food 原始元/公斤已÷2为元/斤（卡片内标注原始价）。');
+ if(hasSupplier) parts.push('供应商数据（如菜亿箩）会自动挂接到同名基准商品，名称不一致的进入待映射区。');
+ parts.push('数据由后端抓取并生成静态包后发布，前端只读展示并缓存在浏览器本地。');
+ $('#cityNote').innerHTML=parts.join('');
+}
+const SYN={'上海青':'大青菜','马铃薯':'土豆','番茄':'西红柿','菜椒':'青椒','老姜':'生姜','鲜鸡蛋':'鸡蛋'};
+function norm(n){if(!n)return '';n=n.replace('（','(').replace('）',')');['/','-','－','_','~','\\'].forEach(c=>n=n.replace(c,''));n=n.replace(/(优|精选|本地|普通)/g,'');return n.trim().toLowerCase();}
+function bindStatusOf(name){
+  const k=norm(name);const m=(DATA&&DATA.bind_map)||{};return m[k]||null;
+}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+// 待映射项：本地内存内校正（仅影响当前会话显示，不写回后端）
+function mapPendingTo(i){const dt=snap();if(!dt)return;const r=dt.pending[i];if(!r)return;const t=dt.canonical.find(c=>c.name===r.target);if(!t){toast('基准商品不存在');return;}if(t.prices.some(pr=>pr.pid===r.pid)){dt.pending.splice(i,1);render();toast('「'+r.target+'」已含菜亿箩价，标记已校正');return;}t.prices.push({pid:r.pid,price:r.price,time:currentDate+' 13:58',mapped:'自动(同义词)'});dt.pending.splice(i,1);render();toast('已对齐：菜亿箩「'+r.pname+'」 → 基准「'+r.target+'」');}
+let kwTimer;$('#fKw').oninput=()=>{clearTimeout(kwTimer);kwTimer=setTimeout(render,200);};
+function render(){
+ const dt=snap();const catSel=$('#fCat');const prev=catSel.value;catSel.innerHTML='<option value="">全部分类</option>';
+ if(dt){dt.cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});if([...catSel.options].some(o=>o.value===prev))catSel.value=prev;}
+ const kw=catSel.value!==undefined?$('#fKw').value.trim():'';const cat=catSel.value;
+ updateHint();
+ updateNote();
+ if(!dt){
+  $('#list').innerHTML='<div class="empty">该城市暂未配置平台或暂无数据存档。请在后端运行更新并发布静态包。</div>';
+  $('#s-plat').textContent=platformsOfCity(currentCity).length;
+  $('#s-prod').textContent=0;$('#s-ok').textContent=0;$('#cntTag').textContent=0;return;
+ }
+ const cityPids=new Set(platformsOfCity(currentCity).map(p=>p.id));
+ const inCity=c=>c.prices.some(pr=>cityPids.has(pr.pid));
+ let list=dt.canonical.filter(c=>{if(!inCity(c))return false;if(cat&&c.cat1!==cat)return false;if(kw&&c.name.indexOf(kw)<0)return false;return true;});
+ const cityCanon=dt.canonical.filter(inCity);
+ const _nMatched=cityCanon.filter(c=>!!bindStatusOf(c.name)).length;
+ const _nUnmatched=cityCanon.length-_nMatched;
+ $('#s-plat').textContent=platformsOfCity(currentCity).length;$('#s-prod').textContent=cityCanon.length;$('#s-ok').textContent=_nMatched;$('#s-pend').textContent=_nUnmatched;$('#cntTag').textContent=list.length;
+ // 统计卡片点击筛选
+ const stOk=document.getElementById('stat-ok');const stPend=document.getElementById('stat-pend');
+ if(!stOk.dataset.inited){
+   stOk.dataset.inited='1';stOk.className+=' clickable';stOk.onclick=function(){bindFilter=bindFilter==='matched'?'all':'matched';render();};
+   stPend.className+=' clickable';stPend.onclick=function(){bindFilter=bindFilter==='unmatched'?'all':'unmatched';render();};
+ }
+ stOk.classList.toggle('active',bindFilter==='matched');stPend.classList.toggle('active',bindFilter==='unmatched');
+ const box=$('#list');box.innerHTML='';if(!list.length){box.innerHTML='<div class="empty">无匹配商品</div>';}
+ // 应用 bindFilter
+ let filtered=list;
+ if(bindFilter==='matched')filtered=list.filter(c=>!!bindStatusOf(c.name));
+ else if(bindFilter==='unmatched')filtered=list.filter(c=>!bindStatusOf(c.name));
+ $('#cntTag').textContent=filtered.length;
+ filtered.forEach(c=>{const cityPlats=platformsOfCity(currentCity).filter(p=>activePlats.has(p.id));const priceMap={};c.prices.forEach(pr=>{if(activePlats.has(pr.pid))priceMap[pr.pid]=pr;});const prices=Object.values(priceMap).map(pr=>pr.price).filter(x=>x!=null&&x!=='—');const avgP=prices.length?(prices.reduce((a,b)=>a+b,0)/prices.length):null;const minP=prices.length?Math.min(...prices):null;
+  const bs=bindStatusOf(c.name);const bound=!!(bs&&bs.length);
+  const div=document.createElement('div');div.className='acc open';
+  const ph=cityPlats.map(pi=>{const pr=priceMap[pi.id];const best=pr&&pr.price===minP&&minP!=null?'best':'';const tag=pr&&pr.mapped?' <span class="badge b-ok">'+pr.mapped+'</span>':'';const raw=pr&&pr.kg?` <span class="meta">原始 ${pr.kg}元/公斤</span>`:'';
+   if(!pr)return `<div class="pcard nodata"><div class="plat"><span class="dot" style="background:${pi.color}"></span>${pi.name}</div><div class="pr" style="color:var(--sub)">—</div><div class="meta">无价格</div></div>`;
+   return `<div class="pcard ${best}"><div class="plat"><span class="dot" style="background:${pi.color}"></span>${pi.name} ${best?'<span class="badge best">最低价</span>':''}${tag}</div><div class="pr">¥${pr.price}<span class="u">/斤</span></div><div class="meta">${pr.spec||''} ｜ 采集:${pr.time}</div>${raw}</div>`;}).join('');
+  const diff=prices.length>1?`价差 ¥${(Math.max(...prices)-minP).toFixed(2)}/斤`:'';
+  const avgInfo=avgP!=null?`<span class="avg-info" style="color:var(--blue);font-weight:600;margin-right:10px">均¥${avgP.toFixed(2)}<span style="font-weight:400;font-size:12px;color:var(--sub)">/斤</span></span>`:'';
+  const minInfo=minP!=null?((()=>{const bestPr=Object.values(priceMap).find(pr=>pr.price===minP);const pi=bestPr?DATA.platforms.find(p=>p.id===bestPr.pid):null;return `<span class="min-info" style="color:var(--green);font-weight:600;margin-right:10px">¥${minP}<span style="font-weight:400;font-size:12px;color:var(--sub)">/斤</span> <span style="font-size:12px;font-weight:400;color:var(--sub);background:#f0fbf4;padding:1px 6px;border-radius:6px">${pi?pi.name:'—'}</span>`;})()):'';
+  const bnames=bs?bs.map(function(b){return b.houchu_name||'基准商品';}).join('、'):'';
+  const bindTag=bound?'<span class="bind-tag bind-ok">✓ 已匹配 '+bnames+'</span>':'<span class="bind-tag bind-none">未匹配基准库</span>';
+  div.innerHTML='<div class="acc-head"><div><span class="nm">'+c.name+'</span><span class="cat">'+c.cat1+' › '+c.cat2+'</span></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+bindTag+avgInfo+minInfo+'<span class="cat">'+diff+'</span><span class="arrow">▶</span></div></div><div class="acc-body"><div class="pcards">'+ph+'</div></div>';
+  div.querySelector('.acc-head').onclick=()=>div.classList.toggle('open');
+  box.appendChild(div);});
+}
+// ---- 启动：优先用本地缓存，后台拉取最新静态包 ----
+async function boot(){
+  const cached=window.PriceStatic.readCache();
+  if(cached&&cached.snaps){
+    DATA=cached;BENCH=cached.houchu;PLATS=cached.houchu_platforms;
+    currentCity=DATA.cities[0].id;currentDate=datesOfCity(currentCity)[0]||null;
+    buildCityOptions();buildDateOptions();buildPlatChips();render();
+    $('#hint').innerHTML+=' <span style="color:var(--sub)">（本地缓存 · 生成于 '+cached.generated_at+'）</span>';
+  }
+  try{
+    const d=await window.PriceStatic.fetchLatest();
+    const changed=!cached||d.generated_at!==cached.generated_at;
+    DATA=d;BENCH=d.houchu;PLATS=d.houchu_platforms;
+    currentCity=DATA.cities[0].id;currentDate=datesOfCity(currentCity)[0]||null;
+    buildCityOptions();buildDateOptions();buildPlatChips();render();
+    if(changed&&cached)toast('数据已更新至 '+d.generated_at);
+  }catch(e){
+    if(!cached){document.getElementById('hint').textContent='加载数据失败：'+e.message;}
+    else toast('获取最新数据失败，显示本地缓存');
+  }
+}
+// ---- 刷新缓存按钮：重新拉取静态包并写回 localStorage ----
+async function refreshCache(){
+  const btn=$('#btnRefresh');if(btn.disabled)return;const old=btn.textContent;btn.disabled=true;btn.textContent='刷新中…';btn.classList.add('loading');
+  try{
+    const d=await window.PriceStatic.fetchLatest();
+    DATA=d;BENCH=d.houchu;PLATS=d.houchu_platforms;
+    currentCity=DATA.cities[0].id;currentDate=datesOfCity(currentCity)[0]||null;
+    buildCityOptions();buildDateOptions();buildPlatChips();
+    if(document.querySelector('.tab.on').dataset.view==='bench')renderBench();else render();
+    toast('本地缓存已更新（生成于 '+d.generated_at+'）');
+  }catch(e){toast('刷新失败：'+e.message);}finally{btn.disabled=false;btn.textContent=old;btn.classList.remove('loading');}
+}
+$('#btnRefresh').onclick=refreshCache;
+// ---- 基准商品库：静态只读展示 ----
+let BENCH=null,PLATS=null;
+function switchView(v){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+  document.getElementById('view-compare').style.display=v==='compare'?'':'none';
+  document.getElementById('view-bench').style.display=v==='bench'?'':'none';
+  if(v==='bench'&&!BENCH)ensureBench();
+}
+function ensureBench(){
+  if(!BENCH&&DATA){BENCH=DATA.houchu;PLATS=DATA.houchu_platforms;}
+  if(BENCH)renderBench();
+}
+function renderBench(){
+  if(!BENCH)return;
+  document.getElementById('b-total').textContent=BENCH.count;
+  document.getElementById('b-excluded').textContent=BENCH.excluded_count||0;
+  document.getElementById('b-pool').textContent=BENCH.pool_size;
+  document.getElementById('b-auto').textContent=BENCH.goods.filter(g=>g.auto&&!g.confirmed).length;
+  document.getElementById('b-conf').textContent=BENCH.confirmed_count;
+  const kw=document.getElementById('bKw').value.trim();
+  const f=document.getElementById('bFilter').value;
+  const catSel=document.getElementById('bCat');
+  const prevCat=catSel.value;
+  catSel.innerHTML='<option value="">全部分类</option>';
+  (BENCH.categories||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
+  if([...catSel.options].some(o=>o.value===prevCat))catSel.value=prevCat;
+  const fc=catSel.value;
+  const filtered=BENCH.goods.filter(g=>{
+    if(f==='unmatched'&&(g.match_key||g.confirmed))return false;
+    if(f==='auto'&&!(g.auto&&!g.confirmed))return false;
+    if(f==='confirmed'&&!g.confirmed)return false;
+    if(kw&&g.name.indexOf(kw)<0)return false;
+    if(fc&&g.cat1!==fc)return false;
+    return true;
+  });
+  const groups={};
+  filtered.forEach(g=>{const c=g.cat1||'(未分类)';if(!groups[c])groups[c]=[];groups[c].push(g);});
+  const catOrder=BENCH.categories||[];
+  const sortedKeys=Object.keys(groups).sort((a,b)=>{
+    if(a==='(未分类)')return 1;if(b==='(未分类)')return -1;
+    return catOrder.indexOf(a)-catOrder.indexOf(b);
+  });
+  const box=document.getElementById('benchList');box.innerHTML='';
+  if(!filtered.length){box.innerHTML='<div class="empty">无匹配商品</div>';return;}
+  sortedKeys.forEach(catName=>{
+    const items=groups[catName];
+    const nOk=items.filter(g=>g.confirmed).length;
+    const nAuto=items.filter(g=>g.auto&&!g.confirmed).length;
+    const nNone=items.filter(g=>!g.match_key&&!g.confirmed).length;
+    const gDiv=document.createElement('div');gDiv.className='bcat-group';
+    gDiv.innerHTML='<div class="bcat-head"><span class="bcat-name">'+catName+' <span style="font-size:12px;color:var(--sub);font-weight:400">('+items.length+')</span></span><div class="bcat-stats"><span class="s-ok">已绑定 '+nOk+'</span><span class="s-auto">自动匹配 '+nAuto+'</span><span class="s-none">未匹配 '+nNone+'</span><span style="margin-left:4px;color:var(--sub)">▶</span></div></div><div class="bcat-body"></div>';
+    const body=gDiv.querySelector('.bcat-body');
+    items.forEach(g=>{
+      const div=document.createElement('div');div.className='brow';
+      let mid='';
+      if(g.confirmed)mid=`<span class="b-badge ok">已绑定：${g.match_name||g.match_key}</span>`;
+      else if(g.auto)mid=`<span class="b-badge auto">建议：${g.match_name}</span>`;
+      else mid=`<span class="b-badge none">未匹配</span>`;
+      div.innerHTML='<div class="bname">'+g.name+'<span class="bunit">'+g.unit+'</span></div><div class="bbind">'+mid+'</div>';
+      body.appendChild(div);
+    });
+    gDiv.querySelector('.bcat-head').onclick=()=>{body.style.display=body.style.display==='none'?'':'none';};
+    box.appendChild(gDiv);
+  });
+}
+let _bt;document.getElementById('bKw').oninput=()=>{clearTimeout(_bt);_bt=setTimeout(renderBench,200);};
+document.getElementById('bFilter').onchange=renderBench;
+document.getElementById('bCat').onchange=renderBench;
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+boot();
+</script></body></html>
