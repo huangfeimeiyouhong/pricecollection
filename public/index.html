@@ -9,6 +9,8 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 .ctl select:focus{border-color:var(--green);}.ctl select:disabled{color:var(--sub);background:#fafafa;}
 .btn-update{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;position:relative;}
 .btn-update:hover{background:#f0fbf4;}.btn-update:disabled{opacity:.6;cursor:default;}
+.btn-export{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;}
+.btn-export:hover{background:#f0fbf4;}
 .btn-update.loading{color:transparent;}.btn-update.loading::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid var(--green);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:flex;gap:12px;margin:14px 0;flex-wrap:wrap;}
@@ -91,7 +93,7 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 <div class="topbar"><div><h1>价格采集 · 多平台比价</h1><div class="hint" id="hint">加载中…</div></div></div>
 <div class="tabs"><div class="tab on" data-view="compare">价格对比</div><div class="tab" data-view="bench">基准商品库</div></div>
 <div id="view-compare">
-<div class="controls"><div class="ctl"><label>城市</label><select id="fCity"></select></div><div class="ctl"><label>数据日期</label><select id="fDate"></select></div><button id="btnRefresh" class="btn-update">刷新缓存</button></div>
+<div class="controls"><div class="ctl"><label>城市</label><select id="fCity"></select></div><div class="ctl"><label>数据日期</label><select id="fDate"></select></div><button id="btnRefresh" class="btn-update">刷新缓存</button><button id="btnExportCompare" class="btn-export">导出 Excel</button></div>
 <div class="summary"><div class="stat"><div class="n" id="s-plat">0</div><div class="l">接入平台</div></div><div class="stat"><div class="n" id="s-prod">0</div><div class="l">平台商品</div></div><div class="stat" id="stat-ok"><div class="n" style="color:var(--green)" id="s-ok">0</div><div class="l">已匹配</div></div><div class="stat" id="stat-pend"><div class="n" style="color:#e08a00" id="s-pend">0</div><div class="l">待映射</div></div></div>
 <div class="note" id="cityNote">加载中…</div>
 <div class="filters"><div class="chips" id="platChips"></div><select id="fCat"><option value="">全部分类</option></select><input id="fKw" placeholder="搜索商品名称…" style="width:180px"></div>
@@ -106,6 +108,7 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
       <span>已绑定 <b id="b-conf">0</b></span>
       <span class="excluded-note">已排除非食材 <b id="b-excluded">0</b> 条</span>
     </div>
+    <button id="btnExportBench" class="btn-export">导出 Excel</button>
   </div>
   <div class="filters">
     <input id="bKw" placeholder="搜索后厨管家商品…" style="width:200px">
@@ -122,6 +125,8 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 </div>
 <div class="toast" id="toast"></div>
 <script src="./static-data.js"></script>
+<script src="./xlsx.full.min.js"></script>
+<script src="./export-excel.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 let DATA=null;let currentCity=null;let currentDate=null;let activePlats=new Set();let bindFilter='all'; // 'all' | 'matched' | 'unmatched'
@@ -302,9 +307,68 @@ function renderBench(){
     box.appendChild(gDiv);
   });
 }
+// ---- 导出：价格对比（当前筛选结果）----
+function exportCompare(){
+  const dt=snap();
+  if(!dt){toast('暂无数据可导出');return;}
+  const catSel=$('#fCat');const cat=catSel.value;
+  const kw=$('#fKw').value.trim();
+  const cityPids=new Set(platformsOfCity(currentCity).map(p=>p.id));
+  const inCity=c=>c.prices.some(pr=>cityPids.has(pr.pid));
+  let list=dt.canonical.filter(c=>{if(!inCity(c))return false;if(cat&&c.cat1!==cat)return false;if(kw&&c.name.indexOf(kw)<0)return false;return true;});
+  if(bindFilter==='matched')list=list.filter(c=>!!bindStatusOf(c.name));
+  else if(bindFilter==='unmatched')list=list.filter(c=>!bindStatusOf(c.name));
+  const cityPlats=platformsOfCity(currentCity);
+  const headers=['类别','商品名称'].concat(cityPlats.map(p=>p.name),['均价(元/斤)','最低价(元/斤)','最低价平台','匹配状态']);
+  const rows=list.map(c=>{
+    const priceMap={};c.prices.forEach(pr=>{if(cityPids.has(pr.pid))priceMap[pr.pid]=pr;});
+    const prices=cityPlats.map(p=>priceMap[p.id]).filter(x=>x&&x.price!=null&&x.price!=='—').map(x=>x.price);
+    const avgP=prices.length?(prices.reduce((a,b)=>a+b,0)/prices.length):null;
+    const minP=prices.length?Math.min.apply(null,prices):null;
+    const bestPr=minP!=null?Object.values(priceMap).find(pr=>pr.price===minP):null;
+    const bestPi=bestPr?DATA.platforms.find(p=>p.id===bestPr.pid):null;
+    const bs=bindStatusOf(c.name);const bound=!!(bs&&bs.length);
+    const row={'类别':(c.cat1||'')+' › '+(c.cat2||''),'商品名称':c.name};
+    cityPlats.forEach(p=>{const pr=priceMap[p.id];row[p.name]=pr&&pr.price!=null&&pr.price!=='—'?pr.price:'—';});
+    row['均价(元/斤)']=avgP!=null?Number(avgP.toFixed(2)):'—';
+    row['最低价(元/斤)']=minP!=null?Number(minP.toFixed(2)):'—';
+    row['最低价平台']=bestPi?bestPi.name:'—';
+    row['匹配状态']=bound?'已匹配':'未匹配';
+    return row;
+  });
+  if(!rows.length){toast('当前筛选无数据可导出');return;}
+  window.HouchuExport.exportTable(headers,rows,'价格对比_'+cityName(currentCity)+'_'+(currentDate||'')+'.xlsx');
+  toast('已导出 '+rows.length+' 条');
+}
+// ---- 导出：基准商品库 / 类别（当前筛选结果）----
+function exportBench(){
+  if(!BENCH){toast('暂无数据');return;}
+  const kw=document.getElementById('bKw').value.trim();
+  const f=document.getElementById('bFilter').value;
+  const fc=document.getElementById('bCat').value;
+  const filtered=BENCH.goods.filter(g=>{
+    if(f==='unmatched'&&(g.match_key||g.confirmed))return false;
+    if(f==='auto'&&!(g.auto&&!g.confirmed))return false;
+    if(f==='confirmed'&&!g.confirmed)return false;
+    if(kw&&g.name.indexOf(kw)<0)return false;
+    if(fc&&g.cat1!==fc)return false;
+    return true;
+  });
+  if(!filtered.length){toast('当前筛选无数据可导出');return;}
+  const headers=['类别','商品名称','单位','匹配状态','匹配对象'];
+  const rows=filtered.map(g=>{
+    const st=g.confirmed?'已绑定':(g.auto?'自动匹配':'未匹配');
+    const match=g.confirmed?(g.match_name||g.match_key||''):(g.auto?(g.match_name||''):'');
+    return {'类别':g.cat1||'(未分类)','商品名称':g.name,'单位':g.unit||'','匹配状态':st,'匹配对象':match};
+  });
+  window.HouchuExport.exportTable(headers,rows,'基准商品库_'+(fc||'全部分类')+'.xlsx');
+  toast('已导出 '+rows.length+' 条');
+}
 let _bt;document.getElementById('bKw').oninput=()=>{clearTimeout(_bt);_bt=setTimeout(renderBench,200);};
 document.getElementById('bFilter').onchange=renderBench;
 document.getElementById('bCat').onchange=renderBench;
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+$('#btnExportCompare').onclick=exportCompare;
+$('#btnExportBench').onclick=exportBench;
 boot();
 </script></body></html>

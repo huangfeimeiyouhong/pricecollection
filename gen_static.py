@@ -30,6 +30,8 @@ def main():
 
     # 2) 拷贝页面与共享脚本
     shutil.copy(os.path.join(ROOT, "static-data.js"), os.path.join(PUBLIC, "static-data.js"))
+    shutil.copy(os.path.join(ROOT, "export-excel.js"), os.path.join(PUBLIC, "export-excel.js"))
+    shutil.copy(os.path.join(ROOT, "xlsx.full.min.js"), os.path.join(PUBLIC, "xlsx.full.min.js"))
     shutil.copy(os.path.join(ROOT, "price-collector.html"),
                 os.path.join(PUBLIC, "price-collector.html"))
     # 主入口命名为 index.html，Cloudflare Pages 根路径直接可访问

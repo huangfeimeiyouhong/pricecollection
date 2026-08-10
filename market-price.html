@@ -43,6 +43,8 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 .toast.show{opacity:1;}
 .btn-refresh{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;}
 .btn-refresh:hover{background:#f0fbf4;}.btn-refresh:disabled{opacity:.6;cursor:default;}
+.btn-export{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;}
+.btn-export:hover{background:#f0fbf4;}
 </style></head><body>
 <div class="nav">
   <span class="brand">价格采集系统</span>
@@ -53,7 +55,7 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 <div class="controls">
   <div class="ctl"><label>城市</label><select id="fCity"></select></div>
   <div class="ctl"><label>数据日期</label><select id="fDate"></select></div>
-  <button id="btnRefresh" class="btn-refresh">刷新缓存</button>
+  <button id="btnRefresh" class="btn-refresh">刷新缓存</button><button id="btnExport" class="btn-export">导出 Excel</button>
 </div>
 <div class="summary">
   <div class="stat"><div class="n" id="s-plat">0</div><div class="l">平台数</div></div>
@@ -69,6 +71,8 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 <div class="cards" id="cards"></div>
 <div class="toast" id="toast"></div>
 <script src="./static-data.js"></script>
+<script src="./xlsx.full.min.js"></script>
+<script src="./export-excel.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 let DATA=null, currentCity=null, currentDate=null;
@@ -98,6 +102,7 @@ async function refreshCache(){
   catch(e){toast('刷新失败：'+e.message);}finally{btn.disabled=false;btn.textContent=old;}
 }
 $('#btnRefresh').onclick=refreshCache;
+$('#btnExport').onclick=exportMarket;
 
 function initCities(){
   const sel=$('#fCity'); sel.innerHTML='';
@@ -191,6 +196,31 @@ function render(){
   });
   if(!plats.length) cards.innerHTML='<div class="empty">该城市未配置平台</div>';
   $('#fHit').textContent = (kw||cat) ? ('匹配 '+totalHit+' 条') : '';
+}
+
+function cityName(c){const x=(DATA&&DATA.cities||[]).find(z=>z.id===c);return x?x.name:c;}
+// ---- 导出：市场价查询（当前城市 + 筛选结果，跨平台展平）----
+function exportMarket(){
+  const snap=(DATA&&DATA.snaps&&DATA.snaps[currentCity]&&DATA.snaps[currentCity][currentDate])||null;
+  if(!snap){toast('暂无数据可导出');return;}
+  const plats=(DATA.platforms||[]).filter(p=>p.city===currentCity);
+  const kw=$('#fKw').value.trim();
+  const cat=$('#fCat').value;
+  const headers=['平台','商品名称','类别','价格(元/斤)','原始(元/公斤)','规格','报价时间'];
+  const rows=[];
+  plats.forEach(p=>{
+    let rs=platRows(p.id,snap).filter(r=>{
+      if(kw&&!r.name.includes(kw))return false;
+      if(cat&&r.cat1!==cat)return false;
+      return true;
+    });
+    rs.forEach(r=>{
+      rows.push({'平台':p.name,'商品名称':r.name,'类别':r.cat1||'其他','价格(元/斤)':Number(r.price).toFixed(2),'原始(元/公斤)':r.kg!=null?Number(r.kg).toFixed(2):'','规格':r.spec||'','报价时间':r.time||''});
+    });
+  });
+  if(!rows.length){toast('当前筛选无数据可导出');return;}
+  window.HouchuExport.exportTable(headers,rows,'市场价_'+cityName(currentCity)+'_'+(currentDate||'')+'.xlsx');
+  toast('已导出 '+rows.length+' 条');
 }
 
 boot();
