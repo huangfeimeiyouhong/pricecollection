@@ -22,6 +22,8 @@ import minnan_adapter
 import caiyiluo_adapter
 import beijing_adapter
 import tianjin_adapter
+import tj_fgj_adapter
+import tj_binhai_adapter
 import houchu_adapter
 
 # ---- 城市 → 平台配置（单一事实来源） ----
@@ -47,6 +49,8 @@ CITY_PLATFORMS = {
         {"id": "T4", "name": "天津韩家墅海吉星", "color": "#e67e22", "src": "tianjin", "role": "base", "city": "tianjin", "market_id": "1030"},
         {"id": "T5", "name": "天津红旗农贸", "color": "#2980b9", "src": "tianjin", "role": "base", "city": "tianjin", "market_id": "1031"},
         {"id": "T6", "name": "天津金钟河", "color": "#16a085", "src": "tianjin", "role": "base", "city": "tianjin", "market_id": "1190"},
+        {"id": "T7", "name": "天津发改委(零售监测)", "color": "#34495e", "src": "tj_fgj", "role": "base", "city": "tianjin"},
+        {"id": "T8", "name": "天津滨海新区(零售监测)", "color": "#7f8c8d", "src": "tj_binhai", "role": "base", "city": "tianjin"},
     ],
 }
 CITIES = [
@@ -146,6 +150,34 @@ def fetch_platform(plat):
                 "time": (r.get("date") or "") + " 报价",
                 "raw_kg": round(float(avg), 2),
                 "cat1": classify_bj(r["name"]),
+                "cat2": "—",
+            })
+        return rows
+    if src == "tj_fgj":
+        res = tj_fgj_adapter.fetch_rows()
+        rows = []
+        for r in res:
+            rows.append({
+                "name": r["name"],
+                "price_jin": r["price_jin"],
+                "spec": "斤",
+                "time": (r.get("period") or "") + " 月均价",
+                "raw_kg": r.get("raw_kg"),
+                "cat1": classify_bj(r.get("category", "")),
+                "cat2": "—",
+            })
+        return rows
+    if src == "tj_binhai":
+        res = tj_binhai_adapter.fetch_rows()
+        rows = []
+        for r in res:
+            rows.append({
+                "name": r["name"],
+                "price_jin": r["price_jin"],
+                "spec": "斤",
+                "time": (r.get("period") or "") + " 月均价",
+                "raw_kg": r.get("raw_kg"),
+                "cat1": classify_bj(r.get("category", "")),
                 "cat2": "—",
             })
         return rows
