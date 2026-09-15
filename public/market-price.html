@@ -45,6 +45,44 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
 .btn-refresh:hover{background:#f0fbf4;}.btn-refresh:disabled{opacity:.6;cursor:default;}
 .btn-export{border:1px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;align-self:flex-end;min-width:96px;}
 .btn-export:hover{background:#f0fbf4;}
+/* ---- 价格预警 / 图表分析（手风琴面板）---- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.panel-h{display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;user-select:none;background:#fafbfc;}
+.panel-h:hover{background:#f4f6f8;}
+.panel-h .ph-title{font-weight:600;font-size:14px;}
+.panel-h .arrow{color:var(--sub);font-size:11px;transition:transform .2s;}
+.panel.open .arrow{transform:rotate(90deg);}
+.panel-b{display:none;padding:12px 14px;border-top:1px solid var(--line);}
+.panel.open .panel-b{display:block;}
+.badge{font-size:11px;padding:1px 8px;border-radius:8px;background:#fdecea;color:#e4393c;font-weight:600;}
+.badge.zero{background:#f0f0f0;color:#888;}
+.ctl-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--sub);}
+.ctl-inline select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:12px;outline:none;background:#fff;color:var(--text);}
+.ctl-inline select:focus{border-color:var(--green);}
+.alert-list{display:flex;flex-direction:column;}
+.alert-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f2f3f5;font-size:13px;flex-wrap:wrap;}
+.alert-row:last-child{border-bottom:none;}
+.a-tag{flex:none;font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600;margin-top:1px;}
+.a-tag.spread{background:#fff4e8;color:#d48806;}
+.a-tag.up{background:#fdecea;color:#e4393c;}
+.a-tag.down{background:#e8f8ee;color:#07a050;}
+.a-name{font-weight:600;min-width:90px;}
+.a-cat{color:var(--sub);font-weight:400;font-size:11px;margin-left:4px;}
+.a-detail{color:var(--sub);flex:1;min-width:220px;line-height:1.5;}
+.a-val{font-weight:600;white-space:nowrap;}
+.a-val.up{color:#e4393c;}.a-val.down{color:#07a050;}.a-val.spread{color:#d48806;}
+.warn-tag{display:inline-block;font-size:10px;padding:0 6px;border-radius:6px;margin-left:6px;font-weight:600;vertical-align:1px;}
+.warn-tag.spread{background:#fff4e8;color:#d48806;}
+.warn-tag.up{background:#fdecea;color:#e4393c;}
+.warn-tag.down{background:#e8f8ee;color:#07a050;}
+.charts{display:flex;gap:14px;flex-wrap:wrap;}
+.chart-box{flex:1;min-width:320px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+.chart-box h4{font-size:13px;font-weight:600;margin-bottom:8px;}
+.chart-box svg{width:100%;height:auto;display:block;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--sub);margin-top:6px;}
+.legend span{display:inline-flex;align-items:center;gap:4px;}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.no-data-tip{color:var(--sub);font-size:12px;padding:8px 0;}
 </style></head><body>
 <div class="nav">
   <span class="brand">价格采集系统</span>
@@ -67,6 +105,29 @@ body{background:var(--bg);color:var(--text);font-size:14px;padding:16px;max-widt
   <input id="fKw" placeholder="搜索商品名称…" style="width:200px">
   <select id="fCat"><option value="">全部分类</option></select>
   <span id="fHit" style="color:var(--sub);font-size:12px"></span>
+</div>
+<div class="panel" id="alertPanel">
+  <div class="panel-h" id="alertHead"><span class="arrow">▶</span><span class="ph-title">价格预警</span><span class="badge zero" id="alertBadge">0</span></div>
+  <div class="panel-b">
+    <div class="ctl-inline">
+      跨平台价差 ≥ <select id="thSpread"><option value="1.2">1.2 倍</option><option value="1.5" selected>1.5 倍</option><option value="2">2 倍</option></select>
+      环比波动 ≥ <select id="thChange"><option value="10">10%</option><option value="20" selected>20%</option><option value="30">30%</option></select>
+      <span id="alertCompare" style="margin-left:auto"></span>
+    </div>
+    <div class="alert-list" id="alertList"></div>
+  </div>
+</div>
+<div class="panel" id="chartPanel">
+  <div class="panel-h" id="chartHead"><span class="arrow">▶</span><span class="ph-title">图表分析</span></div>
+  <div class="panel-b">
+    <div class="charts">
+      <div class="chart-box"><h4>分类均价（元/斤）</h4><div id="catChart"></div></div>
+      <div class="chart-box"><h4>商品价格走势（元/斤）</h4>
+        <div class="ctl-inline" style="margin-bottom:6px"><select id="trendProd" style="min-width:200px"></select></div>
+        <div id="trendChart"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="cards" id="cards"></div>
 <div class="toast" id="toast"></div>
@@ -103,6 +164,180 @@ async function refreshCache(){
 }
 $('#btnRefresh').onclick=refreshCache;
 $('#btnExport').onclick=exportMarket;
+
+// ---- 价格预警 / 图表分析 ----
+let ALERT_MAP={};        // 商品名 -> 预警列表
+let alertAutoOpened=false;
+let trendProd=null;      // 走势图当前选中商品
+$('#alertHead').onclick=()=>$('#alertPanel').classList.toggle('open');
+$('#chartHead').onclick=()=>$('#chartPanel').classList.toggle('open');
+$('#thSpread').onchange=render;
+$('#thChange').onchange=render;
+$('#trendProd').onchange=e=>{trendProd=e.target.value;renderCharts();};
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function platInfo(pid){return (DATA&&DATA.platforms||[]).find(z=>z.id===pid);}
+function platName(pid){const x=platInfo(pid);return x?x.name:pid;}
+function platColor(pid){const x=platInfo(pid);return (x&&x.color)||'#999';}
+function getPrevDate(){
+  const dates=(DATA&&DATA.dates&&DATA.dates[currentCity])||[];
+  const i=dates.indexOf(currentDate);
+  return (i>=0&&i<dates.length-1)?dates[i+1]:null;
+}
+// 预警计算：跨平台价差（最高价/最低价 ≥ 阈值） + 环比波动（对上一存档日期，均价变化 ≥ 阈值）
+function computeAlerts(snap, prevSnap, thSpread, thChange){
+  const out=[];
+  if(!snap) return out;
+  let prevAvg={};
+  if(prevSnap){
+    for(const it of (prevSnap.canonical||[])){
+      const pp=(it.prices||[]).filter(p=>p.price>0);
+      if(pp.length) prevAvg[it.name]=pp.reduce((s,p)=>s+p.price,0)/pp.length;
+    }
+  }
+  const prevD=getPrevDate();
+  for(const item of (snap.canonical||[])){
+    const ps=(item.prices||[]).filter(p=>p.price>0);
+    if(ps.length>=2){
+      let lo=ps[0],hi=ps[0];
+      for(const p of ps){ if(p.price<lo.price)lo=p; if(p.price>hi.price)hi=p; }
+      if(lo.price>0 && hi.price/lo.price>=thSpread){
+        out.push({type:'spread',name:item.name,cat1:item.cat1,pct:(hi.price/lo.price-1)*100,
+          detail:esc(platName(hi.pid))+' ¥'+hi.price.toFixed(2)+' ↔ '+esc(platName(lo.pid))+' ¥'+lo.price.toFixed(2)+'（共 '+ps.length+' 个平台）'});
+      }
+    }
+    if(ps.length && prevAvg[item.name]>0){
+      const cur=ps.reduce((s,p)=>s+p.price,0)/ps.length;
+      const chg=(cur-prevAvg[item.name])/prevAvg[item.name]*100;
+      if(Math.abs(chg)>=thChange){
+        out.push({type:chg>0?'up':'down',name:item.name,cat1:item.cat1,pct:Math.abs(chg),
+          detail:'均价 ¥'+cur.toFixed(2)+' ← 上期（'+(prevD||'')+'）¥'+prevAvg[item.name].toFixed(2)});
+      }
+    }
+  }
+  return out.sort((a,b)=>b.pct-a.pct);
+}
+function renderAlerts(alerts){
+  const badge=$('#alertBadge');
+  badge.textContent=alerts.length;
+  badge.className='badge'+(alerts.length?'':' zero');
+  const prevD=getPrevDate();
+  $('#alertCompare').textContent=prevD?('环比：'+prevD+' → '+(currentDate||'')):'该城市暂无上一期存档，仅启用跨平台价差预警';
+  const list=$('#alertList');
+  if(!alerts.length){
+    list.innerHTML='<div class="no-data-tip">✓ 当前筛选范围内无触发预警的商品</div>';
+    return;
+  }
+  list.innerHTML=alerts.map(a=>{
+    const cls=a.type;
+    const tag=a.type==='spread'?'跨平台价差':(a.type==='up'?'环比上涨':'环比下跌');
+    const val=(a.type==='up'?'+':a.type==='down'?'-':'+')+Math.round(a.pct)+'%';
+    return `<div class="alert-row">
+      <span class="a-tag ${cls}">${tag}</span>
+      <span class="a-name">${esc(a.name)}<span class="a-cat">${esc(a.cat1||'')}</span></span>
+      <span class="a-detail">${a.detail}</span>
+      <span class="a-val ${cls}">${val}</span>
+    </div>`;
+  }).join('');
+}
+function warnTagHtml(name){
+  const list=ALERT_MAP[name];
+  if(!list||!list.length) return '';
+  const a=list.find(x=>x.type==='up'||x.type==='down')||list[0];
+  const cls=a.type;
+  const txt=a.type==='spread'?('价差+'+Math.round(a.pct)+'%'):((a.type==='up'?'↑':'↓')+Math.round(a.pct)+'%');
+  const title=a.type==='spread'?'跨平台价差异警':(a.type==='up'?'较上一期上涨':'较上一期下跌');
+  return `<span class="warn-tag ${cls}" title="${title}">${txt}</span>`;
+}
+// ---- 图表（手写 SVG，无外部依赖）----
+function renderCharts(){
+  const snap=(DATA&&DATA.snaps&&DATA.snaps[currentCity]&&DATA.snaps[currentCity][currentDate])||null;
+  renderCatChart(snap);
+  renderTrendChart();
+}
+function catAvg(snap){
+  const acc={};
+  for(const it of (snap.canonical||[])){
+    const ps=(it.prices||[]).filter(p=>p.price>0);
+    if(!ps.length) continue;
+    const c=it.cat1||'其他';
+    if(!acc[c]) acc[c]={sum:0,n:0};
+    ps.forEach(p=>{acc[c].sum+=p.price;acc[c].n++;});
+  }
+  return Object.entries(acc).map(([cat,v])=>({cat,avg:v.sum/v.n,n:v.n})).sort((a,b)=>b.avg-a.avg);
+}
+function renderCatChart(snap){
+  const box=$('#catChart');
+  if(!snap){box.innerHTML='<div class="no-data-tip">暂无数据</div>';return;}
+  const rows=catAvg(snap).slice(0,10);
+  if(!rows.length){box.innerHTML='<div class="no-data-tip">暂无数据</div>';return;}
+  const W=460,rowH=28,barH=14,L=80,R=70,T=6;
+  const H=T+rows.length*rowH+6;
+  const max=Math.max(...rows.map(r=>r.avg));
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  rows.forEach((r,i)=>{
+    const y=T+i*rowH;
+    const bw=Math.max(2,(W-L-R)*r.avg/max);
+    const name=r.cat.length>6?r.cat.slice(0,5)+'…':r.cat;
+    s+=`<text x="${L-8}" y="${y+rowH/2+4}" text-anchor="end" font-size="12" fill="#1f2329">${esc(name)}</text>`;
+    s+=`<rect x="${L}" y="${y+rowH/2-barH/2}" width="${bw.toFixed(1)}" height="${barH}" rx="3" fill="#07c160" opacity="0.85"/>`;
+    s+=`<text x="${(L+bw+6).toFixed(1)}" y="${y+rowH/2+4}" font-size="11" fill="#8a8f99">¥${r.avg.toFixed(2)}·${r.n}条</text>`;
+  });
+  box.innerHTML=s+'</svg>';
+}
+function renderTrendChart(){
+  const sel=$('#trendProd'), box=$('#trendChart');
+  const dates=[...((DATA.dates&&DATA.dates[currentCity])||[])].reverse(); // 升序
+  const snaps=(DATA.snaps&&DATA.snaps[currentCity])||{};
+  const prodMap={}; // 商品名 -> pid -> {date:price}
+  dates.forEach(d=>{
+    const sn=snaps[d]; if(!sn) return;
+    for(const it of (sn.canonical||[])){
+      for(const p of (it.prices||[])){
+        if(!(p.price>0)) continue;
+        const m=prodMap[it.name]=prodMap[it.name]||{};
+        const s=m[p.pid]=m[p.pid]||{};
+        s[d]=p.price;
+      }
+    }
+  });
+  const names=Object.keys(prodMap).filter(n=>{
+    const ds=new Set();
+    Object.values(prodMap[n]).forEach(s=>Object.keys(s).forEach(k=>ds.add(k)));
+    return ds.size>=2; // 优先有 2 期以上数据的商品
+  }).sort((a,b)=>a.localeCompare(b,'zh'));
+  if(!trendProd||!names.includes(trendProd)) trendProd=names[0]||null;
+  sel.innerHTML=names.slice(0,300).map(n=>{
+    const cov=new Set();
+    Object.values(prodMap[n]).forEach(s=>Object.keys(s).forEach(k=>cov.add(k)));
+    return `<option value="${esc(n)}"${n===trendProd?' selected':''}>${esc(n)}（${cov.size} 期）</option>`;
+  }).join('');
+  if(!trendProd){box.innerHTML='<div class="no-data-tip">该城市暂无跨期商品数据</div>';return;}
+  const series=prodMap[trendProd];
+  const pids=Object.keys(series);
+  const allVals=[];
+  pids.forEach(pid=>dates.forEach(d=>{const v=series[pid][d];if(v!=null)allVals.push(v);}));
+  if(!allVals.length){box.innerHTML='<div class="no-data-tip">暂无数据</div>';return;}
+  const W=460,H=240,L=46,R=12,T=12,B=26,iw=W-L-R,ih=H-T-B;
+  let vmin=Math.min(...allVals),vmax=Math.max(...allVals);
+  if(vmin===vmax){vmin*=0.9;vmax*=1.1;}else{const pad=(vmax-vmin)*0.15;vmin=Math.max(0,vmin-pad);vmax+=pad;}
+  const X=i=>dates.length===1?L+iw/2:L+iw*i/(dates.length-1);
+  const Y=v=>T+ih*(1-(v-vmin)/(vmax-vmin));
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let g=0;g<=4;g++){
+    const v=vmin+(vmax-vmin)*g/4,y=Y(v);
+    s+=`<line x1="${L}" y1="${y.toFixed(1)}" x2="${W-R}" y2="${y.toFixed(1)}" stroke="#ebeef5" stroke-width="1"/>`;
+    s+=`<text x="${L-6}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#8a8f99">${v.toFixed(2)}</text>`;
+  }
+  dates.forEach((d,i)=>{s+=`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8a8f99">${d.slice(5)}</text>`;});
+  pids.forEach(pid=>{
+    const color=platColor(pid);
+    const seg=dates.map((d,i)=>({x:X(i),v:series[pid][d]})).filter(p=>p.v!=null).map(p=>({x:p.x,y:Y(p.v)}));
+    if(seg.length>1) s+=`<polyline points="${seg.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+    seg.forEach(p=>{s+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#fff" stroke="${color}" stroke-width="2"/>`;});
+  });
+  box.innerHTML=s+'</svg><div class="legend">'+pids.map(pid=>`<span><i style="background:${platColor(pid)}"></i>${esc(platName(pid))}</span>`).join('')+'</div>';
+}
 
 function initCities(){
   const sel=$('#fCity'); sel.innerHTML='';
@@ -150,6 +385,13 @@ function render(){
   const snap=(DATA&&DATA.snaps&&DATA.snaps[currentCity]&&DATA.snaps[currentCity][currentDate])||null;
   const plats=(DATA.platforms||[]).filter(p=>p.city===currentCity);
   const source=(snap&&snap.meta&&snap.meta.source)||{};
+  // 价格预警：先算好，供面板与表格标签共用
+  const prevSnap=getPrevDate()?(DATA.snaps[currentCity][getPrevDate()]||null):null;
+  const alerts=computeAlerts(snap, prevSnap, parseFloat($('#thSpread').value), parseFloat($('#thChange').value));
+  ALERT_MAP={};
+  alerts.forEach(a=>{(ALERT_MAP[a.name]=ALERT_MAP[a.name]||[]).push(a);});
+  renderAlerts(alerts);
+  if(alerts.length&&!alertAutoOpened){$('#alertPanel').classList.add('open');alertAutoOpened=true;}
   // 汇总
   $('#s-plat').textContent=plats.length;
   $('#s-prod').textContent=snap?(snap.canonical||[]).length:0;
@@ -179,7 +421,7 @@ function render(){
     const bodyHtml = rows.length
       ? `<table class="ptable"><thead><tr><th>商品</th><th>价格</th><th>规格</th><th>报价时间</th></tr></thead><tbody>${
           rows.map(r=>`<tr>
-            <td><div class="pname">${r.name}</div><div class="pcat">${r.cat1}</div></td>
+            <td><div class="pname">${r.name}${warnTagHtml(r.name)}</div><div class="pcat">${r.cat1}</div></td>
             <td class="pprice">¥${Number(r.price).toFixed(2)}<span class="u">元/斤</span>${
               r.kg!=null?`<span class="kg">¥${Number(r.kg).toFixed(2)} 元/公斤</span>`:''}</td>
             <td>${r.spec||'—'}</td>
@@ -196,6 +438,7 @@ function render(){
   });
   if(!plats.length) cards.innerHTML='<div class="empty">该城市未配置平台</div>';
   $('#fHit').textContent = (kw||cat) ? ('匹配 '+totalHit+' 条') : '';
+  renderCharts();
 }
 
 function cityName(c){const x=(DATA&&DATA.cities||[]).find(z=>z.id===c);return x?x.name:c;}
