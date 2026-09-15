@@ -8,7 +8,7 @@ import json
 import subprocess
 
 ROOT = os.path.dirname(__file__)
-NODE = "/Users/phil/.workbuddy/binaries/node/versions/22.22.2/bin/node"
+NODE = "/Users/phil/.workbuddy/binaries/node/versions/22.22.2-3/bin/node"
 NODE_PATH = "/Users/phil/.workbuddy/binaries/node/workspace/node_modules"
 SCRAPER = os.path.join(ROOT, "beijing_scraper.js")
 
